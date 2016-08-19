@@ -4,19 +4,12 @@ const pkg = require( '../package.json' );
 
 describe('$ banana --version', () => {
 
-  let captured_stdout;
-
-  before((done) => {
-    exec('node bin/index.js --version', (error, stdout) => {
-      captured_stdout = stdout;
-      done();
-    });
-  });
-
   it('Should be return the program version', () => {
-    const result = captured_stdout.replace( '\n', '' );
-    const expect = pkg.version;
+    exec('node dist/bin/index --version', (error, stdout) => {
+      const result = stdout.replace('\n', '');
+      const expect = pkg.version;
 
-    assert.equal(result, expect);
+      assert.equal(result, expect);
+    });
   });
 });

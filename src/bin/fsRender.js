@@ -17,7 +17,7 @@ config.bnnRow = true;
 config.bnnBox = true;
 config.compress = false;
 
-const Banana = require('../src/banana.js')(config);
+const Banana = require('../banana.js')(config);
 
 /**
  * Read the file a .bnn file, render and write a .css file.

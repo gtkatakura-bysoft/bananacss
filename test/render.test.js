@@ -10,7 +10,7 @@ config.bnnAlign = true;
 config.bnnWidth = true;
 config.bnnHeight = true;
 
-const banana = require('../src/banana.js')(config);
+const banana = require('../dist/banana.js')(config);
 
 describe('render()', () => {
 

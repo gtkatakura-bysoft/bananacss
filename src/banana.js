@@ -1,13 +1,25 @@
 'use strict';
 
+const _ = require('lodash')
+const fs = require('fs');
 const css = require('css');
+const toDeclarations = require('./helpers/css/toDeclarations');
 
 /**
  * Get config for dependecies injectio and run all bnn modules
  * @module src/banana
  * @param {object} config - Modules for dependecies injection
  */
-const Banana = (config) => {
+const Banana = ({ bnnImport, bnnVariable, compress, ...bnnPropertiesConfig }) => {
+
+  const bnnProperties = Object.entries(bnnPropertiesConfig)
+    .filter(([key, value]) => value)
+    .map(([key]) => [key, require(`./core/properties/${key}`)])
+    .reduce((reduced, [name, bnnProperty]) => {
+      const hyphenName = _.snakeCase(name).replace(/_/g, '-');
+      reduced[hyphenName] = bnnProperty;
+      return reduced;
+    }, {});
 
   /**
    * Iteration in AST and run all modules
@@ -24,7 +36,7 @@ const Banana = (config) => {
       // Search for all the @import and generate a single AST
       rules.forEach((rule, index) => {
         if (rule.import) {
-          if (config.bnnImport) {
+          if (bnnImport) {
             const bnnImport = require('../src/core/bnnImport.js');
             bnnImport(inputPath, rule.import, rules, index);
           }
@@ -34,56 +46,30 @@ const Banana = (config) => {
       // Search for all global variables and compile
       rules.forEach((rule, index) => {
         if ('' + rule.selectors === ':root') {
-          if (config.bnnVariable) {
+          if (bnnVariable) {
             require('../src/core/bnnVariable.js')(rule, rules, index);
           }
         }
       });
 
       // Search for all banana properties and compile
-      rules.forEach((rule) => {
-        if (rule.selectors) {
+      rules.forEach(({ selectors, declarations }) => {
+        if (selectors) {
+          for (let declaration = null, i = 0; (declaration = declarations[i]); i++) {
+            const bnnProperty = bnnProperties[declaration.property];
 
-          if (config.bnnSize) {
-            require('../src/core/bnnSize.js')(rule.declarations);
+            if (bnnProperty) {
+              const parameters = declaration.value.split(' ');
+              const newProperties = bnnProperty(...parameters);
+              const newDeclarations = toDeclarations(newProperties);
+
+              declarations.splice(i, 1, ...newDeclarations);
+            }
           }
-
-          if (config.bnnPosition) {
-            require('../src/core/bnnPosition.js')(rule.declarations);
-          }
-
-          if (config.bnnGradient) {
-            require('../src/core/bnnGradient.js')(rule.declarations);
-          }
-
-          if (config.bnnAlign) {
-            require('../src/core/bnnAlign.js')(rule.declarations);
-          }
-
-          if (config.bnnWidth) {
-            require('../src/core/bnnWidth.js')(rule.declarations);
-          }
-
-          if (config.bnnHeight) {
-            require('../src/core/bnnHeight.js')(rule.declarations);
-          }
-
-          if (config.bnnCol) {
-            require('../src/core/bnnCol.js')(rule.declarations);
-          }
-
-          if (config.bnnRow) {
-            require('../src/core/bnnRow.js')(rule.declarations);
-          }
-
-          if (config.bnnBox) {
-            require('../src/core/bnnBox.js')(rule.declarations);
-          }
-
         }
       });
 
-      return css.stringify(ast, {compress: config.compress});
+      return css.stringify(ast, { compress });
 
     }
   };
