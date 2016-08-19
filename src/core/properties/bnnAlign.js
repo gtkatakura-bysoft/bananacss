@@ -1,3 +1,5 @@
+const removeNilValues = require('../../helpers/object/removeNilValues');
+
 const toJustifyContent = {
   'left': 'flex-start',
   'right': 'flex-end',
@@ -10,21 +12,11 @@ const toAlignItems = {
   'center': 'center'
 };
 
-const bnnAlign = (horizontal, vertical = horizontal) => {
-  const transformed = {
-    'display': 'flex',
-    'flex-wrap': 'wrap'
-  };
-
-  if (toJustifyContent[horizontal]) {
-    transformed['justify-content'] = toJustifyContent[horizontal];
-  }
-
-  if (toAlignItems[vertical]) {
-    transformed['align-items'] = toAlignItems[vertical];
-  }
-
-  return transformed;
-};
+const bnnAlign = (horizontal, vertical = horizontal) => removeNilValues({
+  'display': 'flex',
+  'flex-wrap': 'wrap',
+  'justify-content': toJustifyContent[horizontal],
+  'align-items': toAlignItems[vertical]
+});
 
 module.exports = bnnAlign;
