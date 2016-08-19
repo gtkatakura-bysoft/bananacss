@@ -38,10 +38,10 @@
   "scripts": {
     "build": "babel src --out-dir dist",
     "prepublish": "npm run build",
-    "cover": "npm run build && babel-istanbul cover node_modules/mocha/bin/_mocha -- ./test/index.js",
+    "cover": "npm run build && babel-istanbul cover node_modules/mocha/bin/_mocha -- ./test/**/*.js",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
-    "test": "npm run build && mocha test/index --compilers babel-core/register",
-    "test-properties": "npm run build && mocha test/properties.test --compilers babel-core/register",
+    "test": "npm run build && mocha test/**/*.js --compilers babel-core/register",
+    "test-properties": "npm run build && mocha test/properties.test/*.js --compilers babel-core/register",
     "eslint": "eslint src/* src/core/* src/helpers/* src/bin/* test/*",
     "jsdocs": "jsdoc src/bin/*.js src/*.js src/core/*.js src/helpers/*.js"
   },
